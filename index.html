@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Clock — HTML CSS JS</title>
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --accent:#4fd1c5;
+      --muted:#94a3b8;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(180deg,var(--bg) 0%, #071022 100%);font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      color:#e6eef6;padding:32px;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px;padding:28px;width:340px;box-shadow:0 8px 30px rgba(2,6,23,0.6);text-align:center;
+      border:1px solid rgba(255,255,255,0.04);
+    }
+    h1{font-size:18px;margin:0 0 12px;color:var(--muted)}
+    .time{
+      font-size:48px;font-weight:700;letter-spacing:1px;margin:6px 0;
+    }
+    .sec{font-size:18px;vertical-align:super;opacity:0.9}
+    .date{color:var(--muted);font-size:14px;margin-top:8px}
+    .controls{display:flex;gap:8px;justify-content:center;margin-top:16px}
+    button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;color:var(--muted);cursor:pointer}
+    button.active{border-color:var(--accent);color:var(--accent);box-shadow:0 6px 18px rgba(79,209,197,0.08)}
+    /* small responsive tweak */
+    @media (max-width:420px){.card{width:92vw;padding:20px}.time{font-size:38px}}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Local time</h1>
+    <div id="clock">
+      <span class="time" id="time">--:--:--</span>
+      <div class="date" id="date">Loading date...</div>
+    </div>
+
+    <div class="controls">
+      <button id="toggleFormat" class="active">12‑hour</button>
+      <button id="toggleSeconds">Show seconds</button>
+    </div>
+  </div>
+
+  <script>
+    // Simple live clock
+    const timeEl = document.getElementById('time');
+    const dateEl = document.getElementById('date');
+    const toggleFormatBtn = document.getElementById('toggleFormat');
+    const toggleSecondsBtn = document.getElementById('toggleSeconds');
+
+    // state
+    let use24Hour = false;
+    let showSeconds = false;
+
+    // helpers
+    function two(n){return String(n).padStart(2,'0')}
+
+    function updateClock(){
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+
+      let period = '';
+      if(!use24Hour){
+        period = hours >= 12 ? ' PM' : ' AM';
+        hours = hours % 12 || 12; // convert 0 -> 12
+      }
+
+      const hh = two(hours);
+      const mm = two(minutes);
+      const ss = two(seconds);
+
+      const timeStr = showSeconds ? `${hh}:${mm}:${ss}${period}` : `${hh}:${mm}${period}`;
+      timeEl.textContent = timeStr;
+
+      // Date string like: Thursday, Sep 11, 2025
+      const opts = {weekday:'long', month:'short', day:'numeric', year:'numeric'};
+      dateEl.textContent = now.toLocaleDateString(undefined, opts);
+    }
+
+    // UI handlers
+    toggleFormatBtn.addEventListener('click', ()=>{
+      use24Hour = !use24Hour;
+      toggleFormatBtn.classList.toggle('active', !use24Hour);
+      toggleFormatBtn.textContent = use24Hour ? '24‑hour' : '12‑hour';
+      // when switching formats, ensure the button text reflects state
+      // keep seconds button unchanged
+      updateClock();
+    });
+
+    toggleSecondsBtn.addEventListener('click', ()=>{
+      showSeconds = !showSeconds;
+      toggleSecondsBtn.classList.toggle('active', showSeconds);
+      toggleSecondsBtn.textContent = showSeconds ? 'Hide seconds' : 'Show seconds';
+      updateClock();
+    });
+
+    // Start the interval. If seconds are shown, update every 200ms for smoothness,
+    // otherwise update every 1000ms (once per minute would drift if seconds hidden, so keep 1s).
+    function startTimer(){
+      updateClock();
+      // clear previous if any
+      if(window._clockInterval) clearInterval(window._clockInterval);
+      window._clockInterval = setInterval(updateClock, showSeconds ? 200 : 1000);
+    }
+
+    // observe changes to showSeconds so interval adjusts when toggled
+    // We'll restart timer whenever toggles change.
+    toggleFormatBtn.addEventListener('click', startTimer);
+    toggleSecondsBtn.addEventListener('click', startTimer);
+
+    // initialize
+    startTimer();
+
+    // accessibility: allow keyboard toggle with space/enter on focused buttons
+    [toggleFormatBtn, toggleSecondsBtn].forEach(btn=>{
+      btn.setAttribute('role','button');
+      btn.tabIndex = 0;
+      btn.addEventListener('keydown', e=>{
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          btn.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
