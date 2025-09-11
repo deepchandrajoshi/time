@@ -3,97 +3,209 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Live Clock — HTML CSS JS</title>
+  <title>Advanced Beautiful Clock</title>
   <style>
-    :root{
-      --bg:#0f1724;
-      --card:#0b1220;
-      --accent:#4fd1c5;
-      --muted:#94a3b8;
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #38bdf8;
+      --accent2: #f472b6;
+      --muted: #94a3b8;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-      background:linear-gradient(180deg,var(--bg) 0%, #071022 100%);font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
-      color:#e6eef6;padding:32px;
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f172a, #020617 70%);
+      font-family: "Poppins", system-ui, sans-serif;
+      color: #e2e8f0;
+      padding: 20px;
     }
-    .card{
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius:14px;padding:28px;width:340px;box-shadow:0 8px 30px rgba(2,6,23,0.6);text-align:center;
-      border:1px solid rgba(255,255,255,0.04);
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border-radius: 20px;
+      padding: 32px;
+      width: 420px;
+      box-shadow: 0 12px 40px rgba(2,6,23,0.7);
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.08);
+      animation: float 6s ease-in-out infinite;
     }
-    h1{font-size:18px;margin:0 0 12px;color:var(--muted)}
-    .time{
-      font-size:48px;font-weight:700;letter-spacing:1px;margin:6px 0;
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
     }
-    .sec{font-size:18px;vertical-align:super;opacity:0.9}
-    .date{color:var(--muted);font-size:14px;margin-top:8px}
-    .controls{display:flex;gap:8px;justify-content:center;margin-top:16px}
-    button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;color:var(--muted);cursor:pointer}
-    button.active{border-color:var(--accent);color:var(--accent);box-shadow:0 6px 18px rgba(79,209,197,0.08)}
-    /* small responsive tweak */
-    @media (max-width:420px){.card{width:92vw;padding:20px}.time{font-size:38px}}
+    h1 {
+      font-size: 22px;
+      margin: 0 0 16px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+    .time {
+      font-size: 54px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-top: 10px;
+    }
+    .period {
+      font-size: 20px;
+      vertical-align: super;
+      color: var(--accent2);
+    }
+    .date {
+      color: var(--muted);
+      font-size: 15px;
+      margin-top: 12px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    button, select {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 8px 14px;
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    button:hover, select:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 6px 18px rgba(56,189,248,0.15);
+    }
+    button.active {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+    select { appearance: none; }
+    /* Analog clock */
+    .analog {
+      margin: 25px auto 10px;
+      width: 180px;
+      height: 180px;
+      border: 6px solid var(--accent);
+      border-radius: 50%;
+      position: relative;
+      background: radial-gradient(circle at center, #1e293b, #0f172a);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+    }
+    .hand {
+      width: 50%;
+      height: 2px;
+      background: var(--accent2);
+      position: absolute;
+      top: 50%;
+      transform-origin: 100%;
+      transform: rotate(90deg);
+      transition: transform 0.5s ease-in-out;
+    }
+    .hand.minute { background: var(--accent); height: 3px; }
+    .hand.second { background: #f87171; height: 2px; }
+    .center-dot {
+      width: 12px; height: 12px; background: #f87171; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    }
+    @media (max-width: 480px) {
+      .card { width: 95vw; padding: 24px; }
+      .time { font-size: 42px; }
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Local time</h1>
+    <h1>World Clock</h1>
     <div id="clock">
-      <span class="time" id="time">--:--:--</span>
+      <span class="time" id="time">--:--</span><span class="period" id="period"></span>
       <div class="date" id="date">Loading date...</div>
     </div>
 
+    <div class="analog">
+      <div class="hand hour" id="hourHand"></div>
+      <div class="hand minute" id="minuteHand"></div>
+      <div class="hand second" id="secondHand"></div>
+      <div class="center-dot"></div>
+    </div>
+
     <div class="controls">
-      <button id="toggleFormat" class="active">12‑hour</button>
+      <button id="toggleFormat" class="active">12-hour</button>
       <button id="toggleSeconds">Show seconds</button>
+      <button id="toggleTheme">Dark Theme</button>
+      <select id="timezoneSelect"></select>
     </div>
   </div>
 
   <script>
-    // Simple live clock
     const timeEl = document.getElementById('time');
     const dateEl = document.getElementById('date');
+    const periodEl = document.getElementById('period');
     const toggleFormatBtn = document.getElementById('toggleFormat');
     const toggleSecondsBtn = document.getElementById('toggleSeconds');
+    const toggleThemeBtn = document.getElementById('toggleTheme');
+    const timezoneSelect = document.getElementById('timezoneSelect');
+    const hourHand = document.getElementById('hourHand');
+    const minuteHand = document.getElementById('minuteHand');
+    const secondHand = document.getElementById('secondHand');
 
-    // state
     let use24Hour = false;
     let showSeconds = false;
-
-    // helpers
-    function two(n){return String(n).padStart(2,'0')}
+    let darkTheme = true;
+    let currentZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     function updateClock(){
       const now = new Date();
-      let hours = now.getHours();
-      const minutes = now.getMinutes();
-      const seconds = now.getSeconds();
+      const options = {
+        timeZone: currentZone,
+        hour12: !use24Hour,
+        hour: 'numeric',
+        minute: 'numeric',
+        second: showSeconds ? 'numeric' : undefined
+      };
 
-      let period = '';
-      if(!use24Hour){
-        period = hours >= 12 ? ' PM' : ' AM';
-        hours = hours % 12 || 12; // convert 0 -> 12
-      }
+      const formatter = new Intl.DateTimeFormat([], options);
+      const parts = formatter.formatToParts(now);
 
-      const hh = two(hours);
-      const mm = two(minutes);
-      const ss = two(seconds);
+      let hh = parts.find(p => p.type === 'hour')?.value || '--';
+      let mm = parts.find(p => p.type === 'minute')?.value || '--';
+      let ss = parts.find(p => p.type === 'second')?.value || '';
+      let dayPeriod = parts.find(p => p.type === 'dayPeriod')?.value || '';
 
-      const timeStr = showSeconds ? `${hh}:${mm}:${ss}${period}` : `${hh}:${mm}${period}`;
+      let timeStr = `${hh}:${mm}`;
+      if(showSeconds && ss) timeStr += `:${ss}`;
       timeEl.textContent = timeStr;
+      periodEl.textContent = use24Hour ? '' : ` ${dayPeriod}`;
 
-      // Date string like: Thursday, Sep 11, 2025
-      const opts = {weekday:'long', month:'short', day:'numeric', year:'numeric'};
-      dateEl.textContent = now.toLocaleDateString(undefined, opts);
+      const dateOpts = {weekday:'long', month:'long', day:'numeric', year:'numeric', timeZone: currentZone};
+      dateEl.textContent = now.toLocaleDateString([], dateOpts);
+
+      // analog
+      const localNow = new Date(now.toLocaleString('en-US', { timeZone: currentZone }));
+      const hours = localNow.getHours() % 12;
+      const minutes = localNow.getMinutes();
+      const seconds = localNow.getSeconds();
+
+      const hourDeg = (hours + minutes / 60) * 30;
+      const minuteDeg = (minutes + seconds / 60) * 6;
+      const secondDeg = seconds * 6;
+
+      hourHand.style.transform = `rotate(${hourDeg}deg)`;
+      minuteHand.style.transform = `rotate(${minuteDeg}deg)`;
+      secondHand.style.transform = `rotate(${secondDeg}deg)`;
     }
 
-    // UI handlers
     toggleFormatBtn.addEventListener('click', ()=>{
       use24Hour = !use24Hour;
       toggleFormatBtn.classList.toggle('active', !use24Hour);
-      toggleFormatBtn.textContent = use24Hour ? '24‑hour' : '12‑hour';
-      // when switching formats, ensure the button text reflects state
-      // keep seconds button unchanged
+      toggleFormatBtn.textContent = use24Hour ? '24-hour' : '12-hour';
       updateClock();
     });
 
@@ -104,34 +216,39 @@
       updateClock();
     });
 
-    // Start the interval. If seconds are shown, update every 200ms for smoothness,
-    // otherwise update every 1000ms (once per minute would drift if seconds hidden, so keep 1s).
+    toggleThemeBtn.addEventListener('click', ()=>{
+      darkTheme = !darkTheme;
+      document.body.style.background = darkTheme
+        ? 'linear-gradient(135deg, #0f172a, #020617 70%)'
+        : 'linear-gradient(135deg, #fdfdfd, #e2e8f0 70%)';
+      document.body.style.color = darkTheme ? '#e2e8f0' : '#1e293b';
+      toggleThemeBtn.textContent = darkTheme ? 'Dark Theme' : 'Light Theme';
+    });
+
     function startTimer(){
       updateClock();
-      // clear previous if any
       if(window._clockInterval) clearInterval(window._clockInterval);
-      window._clockInterval = setInterval(updateClock, showSeconds ? 200 : 1000);
+      window._clockInterval = setInterval(updateClock, 1000);
     }
 
-    // observe changes to showSeconds so interval adjusts when toggled
-    // We'll restart timer whenever toggles change.
-    toggleFormatBtn.addEventListener('click', startTimer);
-    toggleSecondsBtn.addEventListener('click', startTimer);
-
-    // initialize
-    startTimer();
-
-    // accessibility: allow keyboard toggle with space/enter on focused buttons
-    [toggleFormatBtn, toggleSecondsBtn].forEach(btn=>{
-      btn.setAttribute('role','button');
-      btn.tabIndex = 0;
-      btn.addEventListener('keydown', e=>{
-        if(e.key === 'Enter' || e.key === ' '){
-          e.preventDefault();
-          btn.click();
-        }
+    function populateTimezones(){
+      const zones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : [currentZone];
+      zones.forEach(z => {
+        const opt = document.createElement('option');
+        opt.value = z;
+        opt.textContent = z;
+        if(z === currentZone) opt.selected = true;
+        timezoneSelect.appendChild(opt);
       });
+    }
+
+    timezoneSelect.addEventListener('change', (e)=>{
+      currentZone = e.target.value;
+      updateClock();
     });
+
+    populateTimezones();
+    startTimer();
   </script>
 </body>
 </html>
